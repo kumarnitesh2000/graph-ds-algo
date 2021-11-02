@@ -108,6 +108,33 @@ public class DayTwo {
         }
         return res;
     }
+    // min step from start to destination by knight N*N Board
+    //https://www.geeksforgeeks.org/minimum-steps-reach-target-knight/
+    public static int minStepToReachTarget(int KnightPos[], int TargetPos[], int N){
+        Queue<PairPos> q = new LinkedList<>();
+        boolean[][] vis = new boolean[N][N];
+        // convert into zero based indexing
+        q.add(new PairPos(KnightPos[0]-1,KnightPos[1]-1,0));
+        vis[KnightPos[0]-1][KnightPos[1]-1] = true;
+        //horse can move in dir
+        int dx[] = { -2, -1, 1, 2, -2, -1, 1, 2 };
+        int dy[] = { -1, -2, -2, -1, 1, 2, 2, 1 };
+        while(!q.isEmpty()){
+            PairPos poll = q.poll();
+            int x = poll.x,y = poll.y,step = poll.step;
+            if(x==TargetPos[0]-1 && y==TargetPos[1]-1){
+                return step;
+            }
+            for(int i=0;i<dx.length;i++){
+                int new_x = x+dx[i],new_y = y+dy[i];
+                if(new_x>=0 && new_x<N && new_y>=0 && new_y<N && !vis[new_x][new_y]){
+                    vis[new_x][new_y] = true;
+                    q.add(new PairPos(new_x,new_y,step+1));
+                }
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
     public static void main(String[] args) {
         // rotten oranges
         int[][] grid_1 = {{2,1,1},{1,1,0},{0,1,1}};System.out.println("testcase 1: "+orangesRotting(grid_1));
@@ -120,6 +147,9 @@ public class DayTwo {
         //bfs problem start end - description in pdf page(3)
         System.out.print(": "+bfsProblem_start_end(2,100,new int[]{2,5,10}));
         System.out.println();       
+        // bfs problem for finding minimum steps to reach the target pos
+        System.out.println("min steps are : "+minStepToReachTarget(new int[]{4,5},new int[]{1,1},6));
+
     }
 }
 
@@ -136,5 +166,14 @@ class Pos{
     Pos(int x,int y){
         this.x = x;
         this.y = y;
+    }
+}
+
+class PairPos{
+    int x,y,step;
+    PairPos(int x,int y,int step){
+        this.x = x;
+        this.y = y;
+        this.step = step;
     }
 }
