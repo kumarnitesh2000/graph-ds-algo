@@ -17,6 +17,19 @@ public class DayFirst
         }
         return list;
     }
+    public static ArrayList<ArrayList<Integer>> adj_list_directed(int n,int m,int[][] connections){
+        ArrayList<ArrayList<Integer>> list = new ArrayList<>();
+        // n is vertices
+        for(int i=0;i<n;i++){
+            list.add(new ArrayList<Integer>());   
+        }
+        // m is edges
+        for(int i=0;i<m;i++){
+            int u = connections[i][0],v = connections[i][1];
+            list.get(u).add(v);
+        }
+        return list;
+    }
     // print undirected adjancy list
     public static void print_undirected_adj_list(ArrayList<ArrayList<Integer>> adj_list){
         System.out.println("undirected graph");
@@ -106,25 +119,110 @@ public class DayFirst
         }
         System.out.println("");
     }
-    public static int bfsProblem_start_end(int start,int end,int[] options){
-        System.out.println("bfs problem start_end problem");
-        Queue<Pair> q = new LinkedList<>();
-        int res = -1;boolean[] vis = new boolean[end+1];
-        q.add(new Pair(start,0));vis[start] = true;
-        while(!q.isEmpty()){
-            Pair poll = q.poll();
-            if(poll.node==end){
-                res = poll.weight;
-                break;
-            }
-            for(int i=0;i<options.length;i++){
-                if(poll.node*options[i]<=end && !vis[poll.node*options[i]]){
-                    vis[poll.node*options[i]] = true;
-                    q.add(new Pair(poll.node*options[i],poll.weight+1));
+    public static boolean detectCycleinUndirectedGraph_DFS_Util(PairC node,boolean[] vis,ArrayList<ArrayList<Integer>> adj_list){
+        int n = node.node;
+        int par = node.par; 
+        vis[n] = true;
+        Iterator<Integer> itr = adj_list.get(n).listIterator();
+        while(itr.hasNext()){
+            int neigh = itr.next();
+            if(!vis[neigh]){
+                if(detectCycleinUndirectedGraph_DFS_Util(new PairC(neigh,n),vis,adj_list)){
+                    return true;
+                }
+            }else{
+                if(!(par==neigh)){
+                    return true;
                 }
             }
         }
-        return res;
+        return false;
+    }
+    /**
+     * tell the status of cycle in undirected graph
+     * @param adj_list
+     * @return
+     */
+    public static boolean detectCycleinUndirectedGraph_DFS(ArrayList<ArrayList<Integer>> adj_list){
+        int V = adj_list.size();boolean[] vis = new boolean[V];
+        for(int i=0;i<V;i++){
+            if(!vis[i]){
+                boolean is_cycle = detectCycleinUndirectedGraph_DFS_Util(new PairC(i,0),vis,adj_list);
+                if(!is_cycle){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public static boolean detectCycleinUndirectedGraph_BFS_Util(PairC node,boolean[] vis,ArrayList<ArrayList<Integer>> adj_list){
+        int n = node.node;
+        Queue<PairC> q = new LinkedList<>();
+        vis[n] = true;q.add(node);
+        while(!q.isEmpty()){
+            PairC poll = q.poll();
+            int poll_node = poll.node,parent = poll.par;
+            Iterator<Integer> itr = adj_list.get(poll_node).listIterator();
+            while(itr.hasNext()){
+                int neigh = itr.next();
+                if(!vis[neigh]){
+                    vis[neigh] = true;
+                    q.add(new PairC(neigh, poll_node));
+                }else{
+                    if(neigh!=parent){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    /**
+     * tell the status of cycle in undirected graph
+     * @param adj_list
+     * @return
+     */
+    public static boolean detectCycleinUndirectedGraph_BFS(ArrayList<ArrayList<Integer>> adj_list){
+        int V = adj_list.size();boolean[] vis = new boolean[V];
+        for(int i=0;i<V;i++){
+            if(!vis[i]){
+                boolean is_cycle = detectCycleinUndirectedGraph_BFS_Util(new PairC(i,-1),vis,adj_list);
+                if(!is_cycle){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    // detect cycle in directed graph using dfs
+    public static boolean detectCycleInDirectedGraph_DFS_Util(int node,boolean[] vis,boolean[] mark,ArrayList<ArrayList<Integer>> adj_list){
+        vis[node] = true;mark[node] = true;
+        Iterator<Integer> itr = adj_list.get(node).listIterator();
+        while(itr.hasNext()){
+            int neigh = itr.next();
+            if(!vis[neigh]){
+                if(detectCycleInDirectedGraph_DFS_Util(neigh,vis,mark,adj_list)){
+                    return true;
+                }
+            }else{
+                // moving in same path
+                if(mark[neigh]){
+                    return true;
+                }
+            }
+        }
+        mark[node] = false;
+        return false;
+    }
+    public static boolean detectCycleInDirectedGraph_DFS(ArrayList<ArrayList<Integer>> adj_list){
+        int V = adj_list.size();
+        boolean[] vis = new boolean[V],mark = new boolean[V];
+        for(int i=0;i<V;i++){
+            if(detectCycleInDirectedGraph_DFS_Util(i,vis,mark,adj_list)){
+                return true;
+            }
+        }
+        return false;
     }
 	public static void main(String[] args) {
 	    //sample undirected graph
@@ -132,6 +230,14 @@ public class DayFirst
 	    int[][] matrix = {{1,0},{1,2},{2,3},{3,0}};
 		ArrayList<ArrayList<Integer>> adj_undirected_list = adj_list_undirected(input_n,input_m,matrix);
         print_undirected_adj_list(adj_undirected_list);
+        //directed graph creation
+        int n = 5,m = 5;
+        int[][] matrix_3 = {{0,1},{1,2},{1,4},{4,3},{2,3}};
+        ArrayList<ArrayList<Integer>> adj_directed_list = adj_list_directed(n,m,matrix_3);
+        //directed graph creation 2
+        int n1 = 8,m1 = 9;
+        int[][] matrix_4 = {{0,1},{1,2},{1,4},{4,3},{2,3},{7,1},{6,7},{7,5},{5,6}};
+        ArrayList<ArrayList<Integer>> adj_directed_list_1 = adj_list_directed(n1,m1,matrix_4);
         //dfs traversal
         dfs(adj_undirected_list);
         //bfs traversal
@@ -140,8 +246,13 @@ public class DayFirst
         int[][] matrix_2 = {{1,0,1},{1,2,2},{2,3,3},{3,0,4}};
         ArrayList<ArrayList<Pair>> adj_weighted_undirected_list = adj_list_weighted_undirected(input_n,input_m,matrix_2);
         print_weighted_undirected_adj_list(adj_weighted_undirected_list);
-        //bfs problem start end - description in pdf page(3)
-        System.out.println(bfsProblem_start_end(2,100,new int[]{2,5,10})); 
+        //detect cycle in undirected graph using dfs
+        System.out.println("cycle status in undirected graph using dfs : "+detectCycleinUndirectedGraph_DFS(adj_undirected_list));
+        //detect cycle in undirected graph using bfs
+        System.out.println("cycle status in undirected graph using bfs : "+detectCycleinUndirectedGraph_BFS(adj_undirected_list));
+        //detect cycle in directed graph using dfs 
+        System.out.println("cycle status in directed graph using dfs 1: "+detectCycleInDirectedGraph_DFS(adj_directed_list));
+        System.out.println("cycle status in directed graph using dfs 2: "+detectCycleInDirectedGraph_DFS(adj_directed_list_1));
 	}
 }
 
@@ -154,5 +265,13 @@ class Pair{
     }
     public String toString(){
         return "("+node+","+weight+")";
+    }
+}
+
+class PairC{
+    int node,par;
+    PairC(int node,int par){
+        this.node = node;
+        this.par = par;
     }
 }
