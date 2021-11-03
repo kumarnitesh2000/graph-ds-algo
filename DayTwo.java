@@ -135,6 +135,54 @@ public class DayTwo {
         }
         return Integer.MAX_VALUE;
     }
+    public static String newString(String s,int i,char c){
+        char[] ca = s.toCharArray();
+        ca[i] = c;
+        return new String(ca);
+    }
+    public static boolean isOneWordDiffer(String s,String d){
+        for(int i=0;i<s.length();i++){
+            for (char c = 'a'; c <= 'z'; ++c){
+                if(newString(s,i,c).equals(d)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public static boolean findWordInList(String target,String[] list){
+        for(String l: list){
+            if(l.equals(target)){
+                return true;
+            }
+        }
+        return false;
+    }
+    public static int wordLadderLength(String startWord, String targetWord, String[] wordList)
+    {
+        if(!findWordInList(targetWord,wordList)){
+            return 0;
+        }
+        boolean[] vis = new boolean[wordList.length];
+        Queue<WordPair> q = new LinkedList<>();
+        q.add(new WordPair(startWord,1));
+        while(!q.isEmpty()){
+            WordPair poll = q.poll();
+            String word = poll.word;//System.out.println(word);
+            int step = poll.step;
+            //System.out.println(word+" "+step);
+            if(word.equals(targetWord)){
+                return step;
+            }
+            for(int i=0;i<wordList.length;i++){
+                if(!vis[i] && isOneWordDiffer(word,wordList[i])){
+                    q.add(new WordPair(wordList[i],step+1));
+                    vis[i] = true;
+                }
+            }
+        }
+        return 0;
+    }
     public static void main(String[] args) {
         // rotten oranges
         int[][] grid_1 = {{2,1,1},{1,1,0},{0,1,1}};System.out.println("testcase 1: "+orangesRotting(grid_1));
@@ -149,6 +197,8 @@ public class DayTwo {
         System.out.println();       
         // bfs problem for finding minimum steps to reach the target pos
         System.out.println("min steps are : "+minStepToReachTarget(new int[]{4,5},new int[]{1,1},6));
+        //word ladder 1 problem with bfs
+        System.out.println("step take in transformation: "+wordLadderLength("toon","plea",new String[]{"poon","plea","same","poie","plee","plie","poin"}));
 
     }
 }
@@ -174,6 +224,15 @@ class PairPos{
     PairPos(int x,int y,int step){
         this.x = x;
         this.y = y;
+        this.step = step;
+    }
+}
+
+class WordPair{
+    String word;
+    int step;
+    WordPair(String word,int step){
+        this.word = word;
         this.step = step;
     }
 }
