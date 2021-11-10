@@ -121,6 +121,37 @@ public class DaySix {
         }
         return articulation_points;
     }
+    //Bellman ford
+    public static void bellmanFord(int source,int V,int[][] edges){
+        int[] shortest_distance = new int[V];Arrays.fill(shortest_distance,Integer.MAX_VALUE);
+        shortest_distance[source] = 0;
+        for(int i=0;i<V-1;i++){
+            for(int j=0;j<edges.length;j++){
+                int[] edge = edges[j];
+                int u = edge[0],v = edge[1],wt = edge[2];
+                if(shortest_distance[u]!=Integer.MAX_VALUE && shortest_distance[v] > shortest_distance[u]+wt){
+                    shortest_distance[v] = shortest_distance[u]+wt;
+                }
+            }
+        }
+        boolean isNegativeCyle = false;
+        for(int j=0;j<edges.length;j++){
+            int[] edge = edges[j];
+            int u = edge[0],v = edge[1],wt = edge[2];
+            if(shortest_distance[v] > shortest_distance[u]+wt){
+                shortest_distance[v] = shortest_distance[u]+wt;
+                isNegativeCyle = true;
+            }
+        }
+        if(isNegativeCyle){
+            System.out.println("the graph is having a negative cycle");
+        }else{
+            System.out.println("shortest distance from source: "+source+" is: ");
+            for(int i=0;i<V;i++){
+                System.out.print(shortest_distance[i]+" ");
+            }
+        }
+    } 
     public static void main(String[] args) {
         ArrayList<ArrayList<ArrayList<Integer>>> adj = createGraph(5,6,new int[][]{{4,3,3},{2,3,4},{1,2,3},{0,1,1},{0,4,1},{0,3,2}});
         System.out.println("minimum spanning tree: "+spanningTree(5,adj));
@@ -152,6 +183,9 @@ public class DaySix {
             i++;
         }        
         System.out.println();
+        //bellman ford
+        bellmanFord(0,4,new int[][]{{0,1,4},{1,2,-10},{2,3,3},{3,1,5},{0,3,5}});System.out.println();
+        bellmanFord(0,5,new int[][]{{0,1,-1},{0,2,4},{2,3,3},{1,2,3},{1,3,2},{1,4,2},{3,2,5},{3,1,1},{4,3,-3}});System.out.println();
     }
 }
 
